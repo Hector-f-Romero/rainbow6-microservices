@@ -64,7 +64,6 @@ insert into rarities values(default,'Raro',default,default);
 insert into rarities values(default,'Épico',default,default);
 insert into rarities values(default,'Legendario',default,default);
 
-
 -- drop table products cascade;
 -- drop table rarities cascade;
 
