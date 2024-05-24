@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import bcrypt from "bcrypt";
 
 import {
 	createUserDB,
@@ -34,30 +35,39 @@ const getUserByIdController = async (req: Request, res: Response, next: NextFunc
 };
 
 const loginUserController = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { username, password } = req.body;
-        
-        if (!username || !password) {
-            return res.status(400).json({ message: "Usuario y contraseña requerido" });
-        }
+	try {
+		const { username, password } = req.body;
 
-        const user = await getUserLoginBD(username, password);
+		if (!username || !password) {
+			throw new ApiError("Usuario y contraseña requerido", 400);
+		}
 
-        if (!user) {
-            return res.status(401).json({ message: "Usuario o contraseña incorrectos" });
-        }
+		const userDB = await getUserLoginBD(username);
 
-        return res.status(200).json({ message: "Login Correcto", user });
-    } catch (error) {
-        next(error);
-    }
+		if (!userDB) {
+			throw new ApiError(`No existe un usuario con el username '${username}'`, 404);
+		}
+
+		const comparePassword = await bcrypt.compare(password, userDB.password);
+
+		if (!comparePassword) {
+			throw new ApiError(`Contraseña incorrecta. Vuelve a intentarlo`, 400);
+		}
+
+		return res.status(200).json({ message: "Login Correcto", user: userDB });
+	} catch (error) {
+		next(error);
+	}
 };
 
 const createUserController = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const { username = null, password = null, email = null, customer_rank = null, money = null } = req.body;
 
-		const newProduct = await createUserDB(username, password, email, customer_rank, money);
+		const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(password, salt);
+
+		const newProduct = await createUserDB(username, hashedPassword, email, customer_rank, money);
 
 		return res.status(201).json(newProduct);
 	} catch (error) {
@@ -70,12 +80,19 @@ const updateUserController = async (req: Request, res: Response, next: NextFunct
 		const { username = null, password = null, email = null, customer_rank = null, money = null } = req.body;
 		const { id } = req.params;
 
-		// Update the product info with new information
-		await updatedUserDB(Number(id), username, password, email, customer_rank, money);
+		// If exist password, hash a new password
+		if (password) {
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(password, salt);
 
-		// 3. Get the updated record
-		const updatedProduct = await getUserByIdDB(Number(id));
-		return res.status(200).json(updatedProduct);
+			// Update the product info with new information
+			const updatedUser = await updatedUserDB(Number(id), username, hashedPassword, email, customer_rank, money);
+			return res.status(200).json(updatedUser);
+		}
+
+		// Update the product info with new information
+		const updatedUser = await updatedUserDB(Number(id), username, password, email, customer_rank, money);
+		return res.status(200).json(updatedUser);
 	} catch (error) {
 		next(error);
 	}
@@ -101,7 +118,7 @@ export {
 	getUserController,
 	getUserByIdController,
 	loginUserController,
-	createUserController, 
+	createUserController,
 	updateUserController,
 	deleteUserByIdController,
 };

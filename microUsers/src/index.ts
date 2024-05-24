@@ -21,4 +21,4 @@ app.use("/v1/users", userRouter);
 // Handle errors in controllers
 app.use(errorHandler);
 
-app.listen(PORT, () => console.log(`Escuchando microservicio de Products en el puerto ${PORT} 🥶`));
+app.listen(PORT, () => console.log(`Escuchando microservicio de Users en el puerto ${PORT} 🤠`));

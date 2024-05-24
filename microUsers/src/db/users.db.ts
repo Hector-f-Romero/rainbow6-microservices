@@ -21,18 +21,20 @@ export async function getUserByIdDB(userid: number): Promise<User | null> {
 	return rows.length > 0 ? rows[0] : null;
 }
 
-export async function getUserLoginBD(username: string, password: string): Promise<User | null> {
-    const con = await connectToDB();
-    const { rows }: QueryResult<User> = await con.query<User>(
-        "SELECT * FROM users WHERE username = $1 AND password = $2",
-        [username, password]
-    );
+export async function getUserLoginBD(username: string): Promise<User | null> {
+	const con = await connectToDB();
+	const { rows }: QueryResult<User> = await con.query<User>("SELECT * FROM users WHERE username = $1", [username]);
 
-    return rows.length > 0 ? rows[0] : null;
+	return rows.length > 0 ? rows[0] : null;
 }
 
-
-export async function createUserDB(username: string, password: string, email: string, customer_rank: number, money: number) {
+export async function createUserDB(
+	username: string,
+	password: string,
+	email: string,
+	customer_rank: number,
+	money: number
+) {
 	const con = await connectToDB();
 	const result = await con.query<User>(
 		`WITH inserted AS (INSERT INTO users VALUES (default,$1,$2,$3,$4,$5,default,default) RETURNING *)
