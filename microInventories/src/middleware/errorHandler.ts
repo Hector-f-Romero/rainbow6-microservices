@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../utils/customError.js";
 
 export function errorHandler(error: any, req: Request, res: Response, next: NextFunction) {
-	console.error(error); // Log del error
+	// console.error(error); // Log del error
 
 	// Handle custom errors
 	if (error instanceof ApiError) {

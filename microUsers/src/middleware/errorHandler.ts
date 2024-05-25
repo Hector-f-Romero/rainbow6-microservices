@@ -6,11 +6,11 @@ export function errorHandler(error: any, req: Request, res: Response, next: Next
 
 	// Handle custom errors
 	if (error instanceof ApiError) {
-		res.status(error.statusCode).json({ msg: error.message });
+		return res.status(error.statusCode).json({ msg: error.message });
 	}
 
 	if (error instanceof Error) {
-		res.status(500).json({ message: error.message });
+		return res.status(500).json({ message: error.message });
 	}
-	res.status(500).json({ message: "Error del servidor" });
+	return res.status(500).json({ message: "Error del servidor" });
 }
