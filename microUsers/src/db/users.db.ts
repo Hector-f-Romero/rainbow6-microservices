@@ -3,7 +3,7 @@ import { QueryResult } from "pg";
 import { connectToDB } from "./config.js";
 import { User } from "../types/users.type.js";
 
-export async function getUserDB(): Promise<User[] | null> {
+export async function getUsersDB(): Promise<User[] | null> {
 	const con = await connectToDB();
 	const { rows }: QueryResult<User> = await con.query(
 		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank,r.name as rank,r.rank_id,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id"
@@ -16,6 +16,16 @@ export async function getUserByIdDB(userid: number): Promise<User | null> {
 	const { rows }: QueryResult<User> = await con.query<User>(
 		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank as customer_rank_id ,r.name as customer_rank,r.rank_id,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id WHERE u.user_id = $1",
 		[userid]
+	);
+
+	return rows.length > 0 ? rows[0] : null;
+}
+
+export async function getUserByUsernameDB(username: string): Promise<User | null> {
+	const con = await connectToDB();
+	const { rows }: QueryResult<User> = await con.query<User>(
+		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank as customer_rank_id ,r.name as customer_rank,r.rank_id,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id WHERE u.username = $1",
+		[username]
 	);
 
 	return rows.length > 0 ? rows[0] : null;

@@ -4,10 +4,9 @@ import axios from "axios";
 
 import {
 	createInventoryDB,
-	deleteProductByIdDB,
-	updatedUserDB,
 	getInventoriesDB,
 	getInventoryByIdDB,
+	getInventoryByUserIdDB
 } from "../db/inventories.db.js";
 import { ApiError } from "../utils/customError.js";
 
@@ -42,24 +41,16 @@ const getInventoryByIdController = async (req: Request, res: Response, next: Nex
 const getInventoryByUsernameController = async (req: Request, res: Response, next: NextFunction) => {
 	try {
 
-		// * v1/inventories/users/:id
-		const { idUser } = req.params;
+		// * v1/inventories/users/?username="PACO"
+		const { username } = req.params;
 		// 1. Verify that user exists in the USER microservice
-		const resUser = await axios.get(`${process.env.USERS_URI_MIRCROSERVICE}/users/${idUser}`)
+		const resUser = await axios.get(`${process.env.USERS_URI_MIRCROSERVICE}/users?username=${username}`)
 		const user:User = resUser.data
 
+		const userInventary = await getInventoryByUserIdDB(user.user_id);
+		console.log(userInventary)
 
-		const { id } = req.params;
-		const product = await getInventoryByIdDB(Number(id));
-
-		// 2.
-
-
-		// 3.
-
-		// 4.
-		
-		return res.status(200).json({msg:"HOLA"})
+		return res.status(200).json(userInventary)
 	} catch (error) {
 		next(error);
 	}

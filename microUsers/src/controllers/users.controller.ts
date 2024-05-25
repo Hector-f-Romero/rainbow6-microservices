@@ -5,15 +5,23 @@ import {
 	createUserDB,
 	deleteProductByIdDB,
 	updatedUserDB,
-	getUserDB,
+	getUsersDB,
 	getUserByIdDB,
 	getUserLoginBD,
+	getUserByUsernameDB,
 } from "../db/users.db.js";
 import { ApiError } from "../utils/customError.js";
 
-const getUserController = async (req: Request, res: Response, next: NextFunction) => {
+const getUsersController = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const users = await getUserDB();
+		const {username = null} = req.query
+
+		if(username){
+			const user = await getUserByUsernameDB(username as string)
+			return res.status(200).json(user);
+		}
+
+		const users = await getUsersDB();
 		return res.status(200).json(users);
 	} catch (error) {
 		next(error);
@@ -115,7 +123,7 @@ const deleteUserByIdController = async (req: Request, res: Response, next: NextF
 };
 
 export {
-	getUserController,
+	getUsersController,
 	getUserByIdController,
 	loginUserController,
 	createUserController,
