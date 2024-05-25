@@ -14,10 +14,10 @@ import { ApiError } from "../utils/customError.js";
 
 const getUsersController = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const {username = null} = req.query
+		const { username = null } = req.query;
 
-		if(username){
-			const user = await getUserByUsernameDB(username as string)
+		if (username) {
+			const user = await getUserByUsernameDB(username as string);
 			return res.status(200).json(user);
 		}
 
@@ -116,7 +116,7 @@ const deleteUserByIdController = async (req: Request, res: Response, next: NextF
 			throw new ApiError(`No existe el usuario a eliminar con id ${id}`, 404);
 		}
 
-		return res.status(204);
+		return res.status(204).json({ msg: "Eliminado con éxito" });
 	} catch (error) {
 		next(error);
 	}
