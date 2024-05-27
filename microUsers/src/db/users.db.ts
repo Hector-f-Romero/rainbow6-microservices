@@ -68,7 +68,7 @@ export async function updatedUserDB(
 	const con = await connectToDB();
 	const result = await con.query<User>(
 		`WITH inserted AS(UPDATE users SET username = COALESCE($1, username), password = COALESCE($2, password), email = COALESCE($3, email), customer_rank = COALESCE($4, customer_rank), money = COALESCE($5, money), type_user = COALESCE($6,type_user) WHERE user_id = $7 RETURNING *)
-		SELECT i.user_id, i.username, i.password, i.email, i.customer_rank, r.rank_id, r.name as rank, i.type_user i.created_at, i.updated_at FROM 
+		SELECT i.user_id, i.username, i.password, i.email, i.customer_rank, r.rank_id, r.name as rank,i.money ,i.type_user, i.created_at, i.updated_at FROM 
     inserted i JOIN customer_ranks r ON i.customer_rank = r.rank_id;`,
 		[username, password, email, customer_rank, money, typeUser, userId]
 	);
