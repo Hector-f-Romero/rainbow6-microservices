@@ -5,6 +5,7 @@ export interface User {
 	customer_rank: string;
 	customer_rank_id: number;
 	money: number;
+	type_user: string;
 	created_at: string;
 	updated_at: string;
 }

@@ -6,7 +6,7 @@ import { User } from "../types/users.type.js";
 export async function getUsersDB(): Promise<User[] | null> {
 	const con = await connectToDB();
 	const { rows }: QueryResult<User> = await con.query(
-		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank,r.name as rank,r.rank_id,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id"
+		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank,r.name as rank,r.rank_id,u.type_user,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id"
 	);
 	return rows.length > 0 ? rows : null;
 }
@@ -14,7 +14,7 @@ export async function getUsersDB(): Promise<User[] | null> {
 export async function getUserByIdDB(userid: number): Promise<User | null> {
 	const con = await connectToDB();
 	const { rows }: QueryResult<User> = await con.query<User>(
-		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank as customer_rank_id ,r.name as customer_rank,r.rank_id,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id WHERE u.user_id = $1",
+		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank as customer_rank_id ,r.name as customer_rank,r.rank_id,u.type_user,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id WHERE u.user_id = $1",
 		[userid]
 	);
 
@@ -24,7 +24,7 @@ export async function getUserByIdDB(userid: number): Promise<User | null> {
 export async function getUserByUsernameDB(username: string): Promise<User | null> {
 	const con = await connectToDB();
 	const { rows }: QueryResult<User> = await con.query<User>(
-		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank as customer_rank_id ,r.name as customer_rank,r.rank_id,u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id WHERE u.username = $1",
+		"SELECT u.user_id,u.username,u.email,u.money,u.customer_rank as customer_rank_id ,r.name as customer_rank,r.rank_id,u.type_user, u.created_at,u.updated_at FROM users u INNER JOIN customer_ranks r ON u.customer_rank = r.rank_id WHERE u.username = $1",
 		[username]
 	);
 
@@ -43,14 +43,15 @@ export async function createUserDB(
 	password: string,
 	email: string,
 	customer_rank: number,
-	money: number
+	money: number,
+	typeUser: string
 ) {
 	const con = await connectToDB();
 	const result = await con.query<User>(
-		`WITH inserted AS (INSERT INTO users VALUES (default,$1,$2,$3,$4,$5,default,default) RETURNING *)
-		SELECT i.user_id, i.username, i.password, i.email, r.name as rank, i.customer_rank as customer_rank_id, i.money, i.created_at, i.updated_at FROM 
+		`WITH inserted AS (INSERT INTO users VALUES (default,$1,$2,$3,$4,$5,$6,default,default) RETURNING *)
+		SELECT i.user_id, i.username, i.password, i.email, r.name as rank, i.customer_rank as customer_rank_id, i.money, i.type_user, i.created_at, i.updated_at FROM 
     inserted i JOIN customer_ranks r ON i.customer_rank = r.rank_id;`,
-		[username, password, email, customer_rank, money]
+		[username, password, email, customer_rank, money, typeUser]
 	);
 	return result.rows[0];
 }
@@ -61,14 +62,15 @@ export async function updatedUserDB(
 	password: string,
 	email: string,
 	customer_rank: number,
-	money: string
+	money: string,
+	typeUser: string
 ) {
 	const con = await connectToDB();
 	const result = await con.query<User>(
-		`WITH inserted AS(UPDATE users SET username = COALESCE($1, username), password = COALESCE($2, password), email = COALESCE($3, email), customer_rank = COALESCE($4, customer_rank), money = COALESCE($5, money) WHERE user_id = $6 RETURNING *)
-		SELECT i.user_id, i.username, i.password, i.email, i.customer_rank, r.rank_id, r.name as rank, i.created_at, i.updated_at FROM 
+		`WITH inserted AS(UPDATE users SET username = COALESCE($1, username), password = COALESCE($2, password), email = COALESCE($3, email), customer_rank = COALESCE($4, customer_rank), money = COALESCE($5, money), type_user = COALESCE($6,type_user) WHERE user_id = $7 RETURNING *)
+		SELECT i.user_id, i.username, i.password, i.email, i.customer_rank, r.rank_id, r.name as rank, i.type_user i.created_at, i.updated_at FROM 
     inserted i JOIN customer_ranks r ON i.customer_rank = r.rank_id;`,
-		[username, password, email, customer_rank, money, userId]
+		[username, password, email, customer_rank, money, typeUser, userId]
 	);
 	return result.rows[0];
 }

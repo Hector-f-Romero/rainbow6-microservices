@@ -70,12 +70,19 @@ const loginUserController = async (req: Request, res: Response, next: NextFuncti
 
 const createUserController = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const { username = null, password = null, email = null, customer_rank = null, money = null } = req.body;
+		const {
+			username = null,
+			password = null,
+			email = null,
+			customer_rank = null,
+			money = null,
+			type_user = "USER",
+		} = req.body;
 
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(password, salt);
 
-		const newProduct = await createUserDB(username, hashedPassword, email, customer_rank, money);
+		const newProduct = await createUserDB(username, hashedPassword, email, customer_rank, money, type_user);
 
 		return res.status(201).json(newProduct);
 	} catch (error) {
@@ -85,7 +92,14 @@ const createUserController = async (req: Request, res: Response, next: NextFunct
 
 const updateUserController = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		const { username = null, password = null, email = null, customer_rank = null, money = null } = req.body;
+		const {
+			username = null,
+			password = null,
+			email = null,
+			customer_rank = null,
+			money = null,
+			type_user = null,
+		} = req.body;
 		const { id } = req.params;
 
 		// If exist password, hash a new password
@@ -94,12 +108,20 @@ const updateUserController = async (req: Request, res: Response, next: NextFunct
 			const hashedPassword = await bcrypt.hash(password, salt);
 
 			// Update the product info with new information
-			const updatedUser = await updatedUserDB(Number(id), username, hashedPassword, email, customer_rank, money);
+			const updatedUser = await updatedUserDB(
+				Number(id),
+				username,
+				hashedPassword,
+				email,
+				customer_rank,
+				money,
+				type_user
+			);
 			return res.status(200).json(updatedUser);
 		}
 
 		// Update the product info with new information
-		const updatedUser = await updatedUserDB(Number(id), username, password, email, customer_rank, money);
+		const updatedUser = await updatedUserDB(Number(id), username, password, email, customer_rank, money, type_user);
 		return res.status(200).json(updatedUser);
 	} catch (error) {
 		next(error);
