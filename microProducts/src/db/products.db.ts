@@ -21,6 +21,16 @@ export async function getProductByIdDB(productId: number): Promise<Product | nul
 	return rows.length > 0 ? rows[0] : null;
 }
 
+export async function getAvailableProductsToBuyDB(excludeIdsArray: number[]): Promise<Product[] | null> {
+	const con = await connectToDB();
+	const { rows }: QueryResult<Product> = await con.query<Product>(
+		"SELECT p.product_id,p.name,p.description,p.image,p.price,r.name as rarity,r.rarity_id,p.created_at,p.updated_at FROM products p INNER JOIN rarities r ON p.rarity = r.rarity_id WHERE p.product_id != ALL($1)",
+		[excludeIdsArray]
+	);
+
+	return rows.length > 0 ? rows : null;
+}
+
 export async function createProductDB(name: string, description: string, image: string, price: number, rarity: string) {
 	const con = await connectToDB();
 	const result = await con.query<Product>(

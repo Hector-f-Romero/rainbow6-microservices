@@ -105,7 +105,12 @@ const createInventoryController = async (req: Request, res: Response, next: Next
 			updated_at: newInventory.updated_at,
 		};
 
-		// 4. Formatear el inventario para el usuario.
+		// 4. Actualizar dinero del usuario después de la compra
+		await axios.put(`${process.env.USERS_URI_MIRCROSERVICE}/users/${user_id}`, {
+			money: user.money - product.price,
+		});
+
+		// 5. Formatear el inventario para el usuario.
 		return res.status(201).json(userInventory);
 	} catch (error) {
 		next(error);
