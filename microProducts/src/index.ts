@@ -6,6 +6,7 @@ import morgan from "morgan";
 import { connectToDB } from "./db/config.js";
 import { productRouter } from "./routes/products.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { raritiesRouter } from "./routes/rarities.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(morgan("tiny"));
 
 app.use("/v1/products", productRouter);
+app.use("/v1/rarities", raritiesRouter);
 // Handle errors in controllers
 app.use(errorHandler);
 
