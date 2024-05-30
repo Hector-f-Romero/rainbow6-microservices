@@ -44,3 +44,15 @@ export async function deleteInventoryByIdDB(inventoryId: number) {
 	]);
 	return rowCount === 1 ? true : false;
 }
+
+export async function deleteInventoriesWithProductIdDB(productId: number) {
+	const con = await connectToDB();
+	const { rowCount } = await con.query<InventoryRaw>("DELETE FROM inventories WHERE product_id = $1", [productId]);
+	return rowCount === 1 ? true : false;
+}
+
+export async function deleteInventoriesWithUserIdDB(userId: number) {
+	const con = await connectToDB();
+	const { rowCount } = await con.query<InventoryRaw>("DELETE FROM inventories WHERE user_id = $1", [userId]);
+	return rowCount === 1 ? true : false;
+}

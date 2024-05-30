@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response, raw } from "express";
 import axios from "axios";
 
 import {
 	createInventoryDB,
+	deleteInventoriesWithProductIdDB,
+	deleteInventoriesWithUserIdDB,
 	deleteInventoryByIdDB,
 	getInventoriesDB,
 	getInventoryByIdDB,
@@ -25,6 +27,7 @@ const getInventoriesController = async (req: Request, res: Response, next: NextF
 
 			// 2. Get the inventories by username
 			const rawUserInventary = await getInventoryByUserIdDB(user.user_id);
+			console.log(rawUserInventary);
 
 			if (rawUserInventary?.length === 0 || rawUserInventary === null) {
 				return res.status(200).json({ msg: "Inventario vacío." });
@@ -156,9 +159,33 @@ const deleteIventoryByIdController = async (req: Request, res: Response, next: N
 	}
 };
 
+const deleteIventoryWithProductIdController = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const { id } = req.params;
+		await deleteInventoriesWithProductIdDB(Number(id));
+
+		return res.status(204).json({ msg: "Mensaje eliminado con éxito" });
+	} catch (error) {
+		next(error);
+	}
+};
+
+const deleteIventoryWithUserIdController = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const { id } = req.params;
+		await deleteInventoriesWithUserIdDB(Number(id));
+
+		return res.status(204).json({ msg: "Mensaje eliminado con éxito" });
+	} catch (error) {
+		next(error);
+	}
+};
+
 export {
 	getInventoriesController,
 	createInventoryController,
 	getInventoryByIdController,
 	deleteIventoryByIdController,
+	deleteIventoryWithProductIdController,
+	deleteIventoryWithUserIdController,
 };
