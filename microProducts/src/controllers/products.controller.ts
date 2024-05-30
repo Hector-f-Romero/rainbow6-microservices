@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import axios from "axios";
 
+import { v2 as cloudinary, UploadApiResponse, UploadStream } from "cloudinary";
+
 import {
 	createProductDB,
 	deleteProductByIdDB,
@@ -11,6 +13,12 @@ import {
 } from "../db/products.db.js";
 import { ApiError } from "../utils/customError.js";
 import { Inventory } from "../types/inventories.type.js";
+
+cloudinary.config({
+	cloud_name: "dpt05yawm",
+	api_key: process.env.API_KEY_CLOUDINAY,
+	api_secret: process.env.API_SECRET_CLOUDINAY,
+});
 
 const getProductsController = async (req: Request, res: Response, next: NextFunction) => {
 	try {
@@ -44,7 +52,13 @@ const getProductsAvailableController = async (req: Request, res: Response, next:
 			`${process.env.INVENTORIES_URI_MIRCROSERVICE}/inventories?username=${username}`
 		);
 
+		// The user never has bought
+		if (resInventoryMicroservice.data.msg === "Inventario vacío.") {
+			const products = await getProductsDB();
+			return res.status(200).json(products);
+		}
 		const userInventory: Inventory[] = resInventoryMicroservice.data;
+
 		// Save only the product ids that user already have
 		const unavailableProductsIds = userInventory.map((item) => Number(item.product_id));
 
@@ -62,8 +76,28 @@ const createProductController = async (req: Request, res: Response, next: NextFu
 	try {
 		const { name = null, description = null, image = null, price = null, rarity = null } = req.body;
 
-		const newProduct = await createProductDB(name, description, image, price, rarity);
+		const productImg = req.file;
+		const uploadResult: UploadApiResponse = await new Promise((resolve, reject) => {
+			cloudinary.uploader
+				.upload_stream(
+					{ folder: `redes-r6/products/` },
+					(error, uploadResult: UploadApiResponse | undefined) => {
+						if (error) {
+							reject(error);
+						} else if (uploadResult) {
+							resolve(uploadResult);
+						} else {
+							reject(new ApiError("Failed to upload image.", 500));
+						}
+					}
+				)
+				.end(productImg?.buffer);
+		});
 
+		console.log(uploadResult);
+		const newProduct = await createProductDB(name, description, uploadResult.secure_url, price, rarity);
+
+		// return res.status(201).json({ msg: "WI" });
 		return res.status(201).json(newProduct);
 	} catch (error) {
 		next(error);
