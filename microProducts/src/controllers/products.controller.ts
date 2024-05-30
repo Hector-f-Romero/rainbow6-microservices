@@ -127,9 +127,7 @@ const deleteProductByIdController = async (req: Request, res: Response, next: Ne
 		const deletedProduct = await deleteProductByIdDB(Number(id));
 
 		// Delete product in inventory microservice
-		const resInventoryMicroservice = await axios.delete(
-			`${process.env.INVENTORIES_URI_MIRCROSERVICE}/inventories/products/${id}`
-		);
+		await axios.delete(`${process.env.INVENTORIES_URI_MIRCROSERVICE}/inventories/products/${id}`);
 
 		return res.status(204);
 	} catch (error) {

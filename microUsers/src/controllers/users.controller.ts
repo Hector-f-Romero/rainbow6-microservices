@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 
+import axios from "axios";
+
 import {
 	createUserDB,
 	deleteProductByIdDB,
@@ -137,6 +139,9 @@ const deleteUserByIdController = async (req: Request, res: Response, next: NextF
 		if (!deletedProduct) {
 			throw new ApiError(`No existe el usuario a eliminar con id ${id}`, 404);
 		}
+
+		// Delete product in inventory microservice
+		await axios.delete(`${process.env.INVENTORIES_URI_MIRCROSERVICE}/inventories/users/${id}`);
 
 		return res.status(204).json({ msg: "Eliminado con éxito" });
 	} catch (error) {

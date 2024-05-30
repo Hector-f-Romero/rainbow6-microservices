@@ -4,6 +4,7 @@ import axios from "axios";
 import {
 	createInventoryDB,
 	deleteInventoriesWithProductIdDB,
+	deleteInventoriesWithUserIdDB,
 	deleteInventoryByIdDB,
 	getInventoriesDB,
 	getInventoryByIdDB,
@@ -169,10 +170,22 @@ const deleteIventoryWithProductIdController = async (req: Request, res: Response
 	}
 };
 
+const deleteIventoryWithUserIdController = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const { id } = req.params;
+		await deleteInventoriesWithUserIdDB(Number(id));
+
+		return res.status(204).json({ msg: "Mensaje eliminado con éxito" });
+	} catch (error) {
+		next(error);
+	}
+};
+
 export {
 	getInventoriesController,
 	createInventoryController,
 	getInventoryByIdController,
 	deleteIventoryByIdController,
 	deleteIventoryWithProductIdController,
+	deleteIventoryWithUserIdController,
 };
