@@ -126,9 +126,8 @@ const deleteProductByIdController = async (req: Request, res: Response, next: Ne
 
 		const deletedProduct = await deleteProductByIdDB(Number(id));
 
-		if (!deletedProduct) {
-			throw new ApiError(`No existe el producto a eliminar con id ${id}`, 404);
-		}
+		// Delete product in inventory microservice
+		await axios.delete(`${process.env.INVENTORIES_URI_MIRCROSERVICE}/inventories/products/${id}`);
 
 		return res.status(204);
 	} catch (error) {
